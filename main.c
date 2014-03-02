@@ -754,8 +754,18 @@ void ProcessIO(void)
 		sleepcounter = counter_preset;
 		
 		LATA = steps[step_pos];
-		if(step_pos++ >= 3)
-			step_pos = 0;
+		if(step_direction == 0)
+		{
+			if(step_pos++ >= 3)
+				step_pos = 0;
+		}
+		else
+		{
+			if(step_pos == 0)
+				step_pos = 3;
+			else
+				step_pos--;
+		}
 	}
     sleepcounter--;
 
