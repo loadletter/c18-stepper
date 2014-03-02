@@ -256,6 +256,7 @@
 #include "USB/usb.h"
 
 #include "HardwareProfile.h"
+#include <string.h>
 
 /** V A R I A B L E S ********************************************************/
 #if defined(__18CXX)
@@ -716,9 +717,14 @@ void UserInit(void)
  *
  * Note:            None
  *******************************************************************/
+const rom unsigned char steps[4] = { 0x0E, 0x0D, 0x0B, 0x07 };
 void ProcessIO(void)
 {   
     BYTE numBytesRead;
+    static unsigned int sleepcounter = 0;
+    static unsigned int counter_preset = 10000;
+    static unsigned char step_pos = 0;
+    static unsigned char step_direction = 0;
 
     //Blink the LEDs according to the USB device status
     BlinkUSBStatus();
@@ -741,6 +747,17 @@ void ProcessIO(void)
         stringPrinted = FALSE;
     }
 
+    if(sleepcounter == 0)
+    {
+		sleepcounter = counter_preset;
+		
+		LATA |= steps[step_pos];
+		if(step_pos++ >= 3)
+			step_pos = 0;
+	}
+    sleepcounter--;
+
+
     if(USBUSARTIsTxTrfReady())
     {
 		numBytesRead = getsUSBUSART(USB_Out_Buffer,64);
@@ -752,18 +769,29 @@ void ProcessIO(void)
 			{
 				switch(USB_Out_Buffer[i])
 				{
-					case 0x0A:
-					case 0x0D:
-						USB_In_Buffer[i] = USB_Out_Buffer[i];
+					case 'w':
+						counter_preset++;
 						break;
-					default:
-						USB_In_Buffer[i] = USB_Out_Buffer[i] + 1;
+					case 's':
+						if(counter_preset > 0)
+							counter_preset--;
+						break;
+					case 'a':
+						step_direction = 0;
+						break;
+					case 'd':
+						step_direction = 1;
 						break;
 				}
 
 			}
-
-			putUSBUSART(USB_In_Buffer,numBytesRead);
+			itoa(counter_preset, USB_Out_Buffer);
+			if(step_direction == 0)
+				strcatpgm2ram(USB_Out_Buffer, (const far rom char*) " A\r\n");
+			else
+				strcatpgm2ram(USB_Out_Buffer, (const far rom char*) " D\r\n");
+			
+			putUSBUSART(USB_Out_Buffer, strlen(USB_Out_Buffer));
 		}
 	}
 
