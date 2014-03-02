@@ -698,6 +698,8 @@ void UserInit(void)
 
     //Initialize the pushbuttons
     mInitAllSwitches();
+    
+    TRISA = 0x00;
 }//end UserInit
 
 /********************************************************************
@@ -751,7 +753,7 @@ void ProcessIO(void)
     {
 		sleepcounter = counter_preset;
 		
-		LATA |= steps[step_pos];
+		LATA = steps[step_pos];
 		if(step_pos++ >= 3)
 			step_pos = 0;
 	}
