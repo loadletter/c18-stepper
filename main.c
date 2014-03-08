@@ -719,7 +719,7 @@ void UserInit(void)
  *
  * Note:            None
  *******************************************************************/
-const rom unsigned char steps[4] = { 0x0E, 0x0D, 0x0B, 0x07 };
+const rom unsigned char steps[4] = { 0b00001001, 0b00001010, 0b00000110, 0b00000101 };
 void ProcessIO(void)
 {   
     BYTE numBytesRead;
